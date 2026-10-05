@@ -1,0 +1,138 @@
+<Window x:Class="MetroPlanner.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="地铁线路规划器 Metro Planner" Height="880" Width="1360"
+        WindowStartupLocation="CenterScreen" Background="#F4F6F9">
+    <DockPanel>
+        <!-- ============ 顶部菜单 + 工具栏 ============ -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="文件(_F)">
+                <MenuItem Header="新建项目…" Click="NewProject_Click"/>
+                <MenuItem Header="打开项目…" Click="OpenBtn_Click"/>
+                <Separator/>
+                <MenuItem Header="保存 (Ctrl+S)" Click="SaveBtn_Click"/>
+                <MenuItem Header="另存为…" Click="SaveAsBtn_Click"/>
+                <Separator/>
+                <MenuItem Header="导出…" Click="ExportBtn_Click"/>
+                <Separator/>
+                <MenuItem Header="退出" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="编辑(_E)">
+                <MenuItem Header="撤销 (Ctrl+Z)" Click="UndoDrawBtn_Click"/>
+                <MenuItem Header="重做 (Ctrl+Y)" Click="RedoBtn_Click"/>
+                <MenuItem Header="删除所选" Click="DeleteSelectedBtn_Click"/>
+                <MenuItem Header="清空测距" Click="ClearMeasure_Click"/>
+            </MenuItem>
+            <MenuItem Header="视图(_V)">
+                <MenuItem Header="真实地图" Click="MapModeBtn_Click"/>
+                <MenuItem Header="示意图" Click="SchematicModeBtn_Click"/>
+                <MenuItem Header="示意图自动布局" Click="AutoArrangeBtn_Click"/>
+                <MenuItem Header="适应窗口" Click="FitBtn_Click"/>
+            </MenuItem>
+            <MenuItem Header="帮助(_H)">
+                <MenuItem Header="使用说明" Click="Help_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <Border DockPanel.Dock="Top" Background="White" BorderBrush="#E2E6EC" BorderThickness="0,0,0,1" Padding="8,6">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="NewProjectBtn" Content="新建项目" Click="NewProject_Click"/>
+                <Button x:Name="OpenBtn" Content="打开" Click="OpenBtn_Click" Margin="6,0,0,0"/>
+                <Button x:Name="SaveBtn" Content="保存" Click="SaveBtn_Click" Margin="6,0,0,0"/>
+                <Button x:Name="SaveAsBtn" Content="另存为" Click="SaveAsBtn_Click" Margin="6,0,0,0"/>
+                <Button x:Name="ExportBtn" Content="导出…" Click="ExportBtn_Click" Margin="6,0,0,0"/>
+                <Separator Margin="10,0"/>
+                <ToggleButton x:Name="MapModeBtn" Content="真实地图" Click="MapModeBtn_Click" IsChecked="True" Width="82"/>
+                <ToggleButton x:Name="SchematicModeBtn" Content="示意图" Click="SchematicModeBtn_Click" Width="82" Margin="4,0,0,0"/>
+                <Separator Margin="10,0"/>
+                <TextBox x:Name="CitySearchBox" Width="150" VerticalContentAlignment="Center" KeyDown="CitySearchBox_KeyDown" ToolTip="搜索城市并定位"/>
+                <Button x:Name="CitySearchBtn" Content="定位" Click="CitySearchBtn_Click" Margin="4,0,0,0"/>
+                <ComboBox x:Name="CityPresetCombo" Width="130" Margin="4,0,0,0" SelectionChanged="CityPresetCombo_SelectionChanged"/>
+                <Separator Margin="10,0"/>
+                <TextBlock Text="底图" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#555"/>
+                <ComboBox x:Name="BasemapCombo" Width="150" SelectionChanged="BasemapCombo_SelectionChanged"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ============ 主体 ============ -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="330"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧：图标工具条 + 专属面板 -->
+            <Grid Grid.Column="0" Background="White">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="56"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 图标工具条 -->
+                <Border Grid.Column="0" Background="#FAFBFC" BorderBrush="#E2E6EC" BorderThickness="0,0,1,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="ToolBarStack" Margin="4,8">
+                            <!-- 工具按钮由代码填充（图标样式） -->
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- 专属面板宿主（随工具切换） -->
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="ToolPanelHost" Margin="10,10"/>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- 右侧画布 -->
+            <Grid Grid.Column="1" Background="#F4F6F9" ClipToBounds="True">
+                <Canvas x:Name="MapCanvas" Background="White"
+                        MouseDown="MapCanvas_MouseDown" MouseMove="MapCanvas_MouseMove"
+                        MouseUp="MapCanvas_MouseUp" MouseWheel="MapCanvas_MouseWheel"
+                        MouseRightButtonDown="MapCanvas_MouseRightButtonDown"
+                        MouseRightButtonUp="MapCanvas_MouseRightButtonUp"/>
+
+                <Border x:Name="LegendBox" Background="#FAFFFFFF" BorderBrush="#E2E6EC" BorderThickness="1"
+                        CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="12" Padding="10" MinWidth="150">
+                    <StackPanel x:Name="LegendPanel"/>
+                </Border>
+
+                <Border x:Name="StatusBox" Background="#FAFFFFFF" BorderBrush="#E2E6EC" BorderThickness="1"
+                        CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12" Padding="8,5">
+                    <TextBlock x:Name="StatusText" FontSize="12" Foreground="#555" Text="当前工具：选择 / 拖动"/>
+                </Border>
+
+                <Border x:Name="NorthArrow" Width="46" Height="46" Background="#FAFFFFFF" BorderBrush="#E2E6EC"
+                        BorderThickness="1" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="12,12,12,52" IsHitTestVisible="False">
+                    <Grid>
+                        <Path Stroke="#e4002b" StrokeThickness="2" Fill="#e4002b" Data="M23,8 L29,24 L23,20 L17,24 Z"/>
+                        <TextBlock Text="北" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+                    </Grid>
+                </Border>
+
+                <StackPanel x:Name="SchematicTopBar" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12" Visibility="Collapsed">
+                    <Button x:Name="AutoArrangeBtn" Content="自动布局" Click="AutoArrangeBtn_Click" Margin="0,0,6,0"/>
+                    <Button x:Name="SchStraightenBtn" Content="一键拉直" Click="SchStraightenBtn_Click" Margin="0,0,6,0"/>
+                    <Button x:Name="SchResetGeoBtn" Content="重置为真实走向" Click="SchResetGeoBtn_Click" Margin="0,0,6,0"/>
+                    <Button x:Name="FitBtn" Content="适应窗口" Click="FitBtn_Click"/>
+                </StackPanel>
+
+                <!-- 欢迎屏幕 -->
+                <Border x:Name="WelcomePanel" Background="White">
+                    <Grid>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="460">
+                            <TextBlock Text="🚇 地铁线路规划器" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Metro Planner — 虚拟地铁线路规划桌面工具" FontSize="13" Foreground="Gray" HorizontalAlignment="Center" Margin="0,4,0,24"/>
+                            <Button x:Name="WelcomeNewBtn" Content="新建项目…" Height="40" FontSize="14" Click="NewProject_Click"/>
+                            <Button x:Name="WelcomeOpenBtn" Content="打开项目…" Height="40" FontSize="14" Click="OpenBtn_Click" Margin="0,8,0,0"/>
+                            <Button x:Name="WelcomeDemoBtn" Content="载入示例数据" Height="40" FontSize="14" Click="LoadDemoBtn_Click" Margin="0,8,0,0"/>
+                            <Button x:Name="WelcomeContinueBtn" Content="继续上次编辑" Height="40" FontSize="14" Click="WelcomeContinueBtn_Click" Margin="0,8,0,0" Visibility="Collapsed"/>
+                            <TextBlock Text="最近打开的项目" FontWeight="Bold" Foreground="#555" Margin="0,24,0,6"/>
+                            <ListBox x:Name="RecentList" Height="150" SelectionChanged="RecentList_SelectionChanged"/>
+                            <TextBlock x:Name="RecentEmpty" Text="（暂无最近项目）" Foreground="Gray" FontSize="12" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>

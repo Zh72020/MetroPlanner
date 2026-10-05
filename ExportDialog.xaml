@@ -1,0 +1,78 @@
+<Window x:Class="MetroPlanner.ExportDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="导出" Width="820" Height="680"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" ShowInTaskbar="False">
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 左侧：选项 -->
+        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="导出选项" FontSize="15" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                <TextBlock Text="格式" FontSize="11" Foreground="Gray" Margin="0,0,0,2"/>
+                <ComboBox x:Name="TypeCombo" SelectionChanged="TypeCombo_SelectionChanged"/>
+
+                <TextBlock Text="导出范围" FontSize="11" Foreground="Gray" Margin="0,12,0,2"/>
+                <CheckBox x:Name="FullExtentChk" Content="全部线路全貌（推荐）" IsChecked="True" Checked="FullExtent_Changed" Unchecked="FullExtent_Changed"/>
+                <TextBlock Text="始终按所有站点/线路的完整边界导出，与当前屏幕缩放无关。" FontSize="11" Foreground="Gray" TextWrapping="Wrap" Margin="0,2,0,0"/>
+
+                <TextBlock Text="比例尺" FontSize="11" Foreground="Gray" Margin="0,12,0,2"/>
+                <CheckBox x:Name="ScaleBarChk" Content="在图上绘制比例尺" IsChecked="True" Checked="ScaleBar_Changed" Unchecked="ScaleBar_Changed"/>
+
+                <TextBlock Text="文字大小" FontSize="11" Foreground="Gray" Margin="0,12,0,2"/>
+                <CheckBox x:Name="AutoTextChk" Content="自动调整（防重叠）" IsChecked="True" Checked="AutoText_Changed" Unchecked="AutoText_Changed"/>
+                <DockPanel Margin="0,4,0,0">
+                    <TextBlock x:Name="FontValText" Text="1.0×" DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#0f7dc2"/>
+                    <Slider x:Name="FontScaleSlider" Minimum="0.5" Maximum="2.5" Value="1.0" ValueChanged="FontScale_Changed" IsEnabled="False"/>
+                </DockPanel>
+                <TextBlock Text="手动文字比例（取消自动后生效）" FontSize="10" Foreground="Gray" Margin="0,0,0,0"/>
+
+                <TextBlock Text="线路粗细" FontSize="11" Foreground="Gray" Margin="0,12,0,2"/>
+                <DockPanel>
+                    <TextBlock x:Name="LineValText" Text="1.0×" DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#0f7dc2"/>
+                    <Slider x:Name="LineScaleSlider" Minimum="0.5" Maximum="3" Value="1.0" ValueChanged="LineScale_Changed"/>
+                </DockPanel>
+
+                <TextBlock Text="底图加载层级" FontSize="11" Foreground="Gray" Margin="0,12,0,2"/>
+                <DockPanel>
+                    <TextBlock x:Name="ZoomValText" Text="14" DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#0f7dc2" FontWeight="Bold"/>
+                    <Slider x:Name="ZoomSlider" Minimum="3" Maximum="19" Value="14" ValueChanged="ZoomSlider_Changed"/>
+                </DockPanel>
+                <TextBlock Text="仅「嵌入底图瓦片」格式生效。" FontSize="10" Foreground="Gray"/>
+
+                <TextBlock Text="矢量 SVG 可在 PS/AI 中编辑；「嵌入底图」与 PNG 包含地图背景。" FontSize="11" Foreground="Gray" TextWrapping="Wrap" Margin="0,10,0,0"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- 右侧：预览 -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" BorderBrush="#E2E6EC" BorderThickness="1" Background="#F7F9FB" ClipToBounds="True">
+                <ScrollViewer x:Name="PreviewScroller" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Image x:Name="PreviewImage" Stretch="None" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <TextBlock x:Name="PreviewEmpty" Text="（无内容）" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock Text="预览缩放" VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+                <Slider x:Name="PreviewZoomSlider" Minimum="0.1" Maximum="3" Value="0.5" Width="200" Margin="8,0" ValueChanged="PreviewZoom_Changed"/>
+                <Button x:Name="RefreshBtn" Content="刷新预览" Click="RefreshBtn_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button x:Name="ExportBtn" Content="导出…" Width="90" Margin="0,0,8,0" Click="ExportBtn_Click"/>
+            <Button Content="关闭" Width="90" Click="Cancel_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

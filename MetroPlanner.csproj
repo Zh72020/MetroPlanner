@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>MetroPlanner</AssemblyName>
+    <RootNamespace>MetroPlanner</RootNamespace>
+    <AssemblyTitle>地铁线路规划器 Metro Planner</AssemblyTitle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PinYinConverterCore" Version="1.0.2" />
+  </ItemGroup>
+
+</Project>
